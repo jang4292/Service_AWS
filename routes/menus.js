@@ -1,18 +1,26 @@
+"use strict"
 var express = require('express');
 var router = express.Router();
 
+const mysql = require('mysql');
+const db_config = require('./config/db-config.json');
+
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-    const tempArray = tempMainMenuList.map((name, index) => {
-        return {
-            idx: index,
-            menuName: name
+    const connection = mysql.createConnection(db_config);
+    connection.connect();
+
+    connection.query('SELECT * FROM service.menus', function (err, results, fields) {
+        if (err) {
+            console.log(err);
         }
+        console.log(results);
+
+        connection.end();
+
+        res.status(200);
+        res.json(results);
     });
-    res.status(200);
-    res.json(tempArray);
 });
 
 module.exports = router;
-
-const tempMainMenuList = ["계산기0", "계산기1", "계산기2", "계산기3"];
