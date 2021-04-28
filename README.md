@@ -12,3 +12,11 @@ port 3000
 * get 
 
 1. /menus    json file about main menu list.
+
+
+* post
+
+1. /users
+	1-1 /users/register
+		- name
+		- password
