@@ -6,6 +6,7 @@
 
  
 ## url : ec2-13-125-131-14.ap-northeast-2.compute.amazonaws.com
+## url-domain : yhjang.shop
 ----------------------------------------------------------------
 port 3000
 
