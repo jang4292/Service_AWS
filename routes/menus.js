@@ -1,23 +1,16 @@
-"use strict"
-var express = require('express');
-var router = express.Router();
+"use strict";
+const express = require('express');
+const router = express.Router();
 
-const mysql = require('mysql');
-const db_config = require('./config/db-config.json');
+const path = require('path');
+const db = require(path.join(__dirname, `../public/javascripts/DatabaseManager`));
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-    const connection = mysql.createConnection(db_config);
-    connection.connect();
-
-    connection.query('SELECT * FROM service.menus', function (err, results, fields) {
-        if (err) {
-            console.log(err);
-        }
+    const query = `SELECT * FROM service.menus`;
+    db.query(query, (err, results, fields) => {
+        if (err) console.log(err);
         console.log(results);
-
-        connection.end();
-
         res.status(200);
         res.json(results);
     });
