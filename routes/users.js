@@ -68,4 +68,61 @@ router.post('/login', async (req, res, next) => {
     }, userName);
 });
 
+router.post('/update', async (req, res, next) => {
+    const userName = req.body.name;
+    if (!userName) {
+        console.log(`no data of name :${userName}`);
+        return res.status(400).send(`no data of name :${userName}`);
+    }
+    const query = `SELECT * FROM users WHERE name Like ?`;
+    db.query(query, (err, results) => {
+        if (err) {
+            console.log(' err : ' + err);
+            return res.status(500).send('query error : ' + err);
+        }
+
+        if (!results || results.length === 0) {
+            return res.status(500).send('query no result ');
+        }
+
+        try {
+            bcrypt.compare(req.body.password, results[0].hashPassword, async (err, result) => {
+                if (err) {
+                    console.log('err : ' + err);
+                    return res.status(500).send(JSON.stringify({
+                        message: 'not Allowed',
+                        error: err
+                    }));
+                }
+
+                if (result) {
+                    delete req.body.password;
+                    const currentTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
+                    const queryObj = req.body;
+                    queryObj['hashPassword'] = results[0].hashPassword;
+                    queryObj['update_time'] = currentTime;
+
+                    const query = `UPDATE users SET ? WHERE name LIKE ?`;
+                    db.query(query, (err, results) => {
+                        if (err) {
+                            console.log(' err : ' + err);
+                            return res.status(500).send('query error : ' + err);
+                        }
+
+                        if (!results || results.length === 0) {
+                            return res.status(500).send('query no result ');
+                        }
+                        console.log(result);
+                        res.status(200).send(result ? 'Update Success' : 'Not Allowed');
+                    }, [queryObj, userName]);
+                } else {
+                    res.status(500).send('wrong password');
+                }
+            });
+        } catch (e) {
+            res.status(500).send('Qeury Error' + e);
+        }
+    }, userName);
+});
+
 module.exports = router;
