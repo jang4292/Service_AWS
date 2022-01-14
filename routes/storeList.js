@@ -8,7 +8,7 @@ const db = require(path.join(__dirname, `../public/javascripts/DatabaseManager`)
 
 /* GET users listing. */
 router.get('/', cors(), (req, res, next) => {
-    const query = `SELECT * FROM service.storeList`;
+    const query = `SELECT * FROM service.storeList LIMIT 25`;
     db.query(query, (err, results, fields) => {
         if (err) {
             console.log(err);
