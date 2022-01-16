@@ -8,16 +8,8 @@ const db = require(path.join(__dirname, `../public/javascripts/DatabaseManager`)
 
 /* GET users listing. */
 router.get('/', cors(), (req, res, next) => {
-    const startPos = req.query ? req.query.startPos : null;
-    if (!type) {
-        res.status(405);
-        res.json({
-            result: -1,
-            error: "To need check Start position"
-        });
-        return;
-    }
-    const query = `SELECT * FROM service.storeList LIMIT ${startPos}, ${startPos + 12}`;
+    const startPos = req.query && req.query.startPos ? req.query.startPos : 0;
+    const query = `SELECT * FROM service.storeList LIMIT ${startPos}, ${startPos + 10}`;
     db.query(query, (err, results, fields) => {
         if (err) {
             console.log(err);
@@ -35,6 +27,7 @@ router.get('/', cors(), (req, res, next) => {
         res.status(200);
         res.json({
             result: 1,
+            isNext: results.length < 10,
             data: results
         });
     });
