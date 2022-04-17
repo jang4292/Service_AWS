@@ -33,4 +33,29 @@ router.get('/', cors(), (req, res, next) => {
     });
 });
 
+router.post('/register', cors(), function (req, res, next) {
+    const body = req.body;
+    const queryObj = {
+        name: body.title,
+        title: body.title,
+        store_type: body.type,
+        distance: body.distance,
+        maxDiscount: body.maxDiscount,
+        minDiscount: body.minDiscount,
+        location: body.location,
+    };
+
+    const query = `INSERT INTO service.storeList SET ?`;
+    db.query(query, async (err, results) => {
+        if (err) {
+            console.log(' err : ' + err);
+            res.status(500).send();
+        } else {
+            console.log(' results : ' + results);
+            res.status(200).send();
+        }
+    }, queryObj);
+
+});
+
 module.exports = router;
