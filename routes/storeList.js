@@ -27,7 +27,7 @@ router.get('/', cors(), (req, res, next) => {
         res.status(200);
         res.json({
             result: 1,
-            isNext: results.length < 10,
+            isNext: results.length === 10,
             data: results
         });
     });
