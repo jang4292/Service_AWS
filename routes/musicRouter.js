@@ -10,7 +10,12 @@ const db = require(path.join(__dirname, `../public/javascripts/DatabaseManager`)
 router.get('/', cors(), (req, res, next) => {
     const query = `SELECT * FROM service.musics`;
     db.query(query, (err, results, fields) => {
-        if (err) console.log(err);
+        if (err) {
+            console.log(err);
+            res.status(500);
+            res.json({ result: -2, error: "Internal server error" });
+            return;
+        }
         console.log(results);
         res.status(200);
         res.json(results);
