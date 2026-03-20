@@ -167,13 +167,13 @@ const db = (() => {
     const db_config = require('../../config/db-config.json');
     return {
         async query(queryString, callback, queryObj = null) {
-            const connection = mysql.createConnection(db_config);
+            const connection = mysql.createConnection(db_config); // 새 DB 연결 생성
             const obj = await new Promise(resolve =>
                 connection.query(queryString, queryObj, (err, results, fields) =>
                     resolve({ err, results, fields })
                 )
             );
-            connection.end();
+            connection.end(); // 연결 종료
             return callback(obj.err, obj.results, obj.fields);
         }
     };
@@ -181,7 +181,7 @@ const db = (() => {
 ```
 
 **현재 패턴**: 요청마다 새 연결 생성 → 쿼리 실행 → 연결 종료  
-**권고 패턴**: `mysql.createPool()`을 사용한 연결 풀 관리
+**권고 패턴**: `mysql.createPool()`을 사용한 연결 풀(Connection Pool) 관리
 
 ---
 
@@ -212,13 +212,13 @@ const db = (() => {
 
 ### 미구현 보안 수단 (권고)
 
-| 수단              | 적용 필요 위치     | 설명                         |
-|-------------------|--------------------|------------------------------|
-| 인증 미들웨어     | `/users/update`    | JWT 또는 세션 기반 인증        |
-| 요청 속도 제한    | 전체               | `express-rate-limit` 도입    |
-| Helmet            | 전체               | HTTP 보안 헤더 설정            |
-| 입력 유효성 검사  | 모든 POST 엔드포인트 | `express-validator` 도입     |
-| HTTPS             | 전체               | SSL/TLS 인증서 적용           |
+| 수단                  | 적용 필요 위치        | 설명                                          |
+|-----------------------|-----------------------|-----------------------------------------------|
+| 인증 미들웨어         | `/users/update`       | JWT 또는 세션 기반 인증                        |
+| 요청 속도 제한        | 전체                  | `express-rate-limit` 도입 (무차별 대입 공격 방지) |
+| Helmet                | 전체                  | HTTP 보안 헤더 자동 설정 (보안 헤더 미들웨어)  |
+| 입력 유효성 검사      | 모든 POST 엔드포인트  | `express-validator` 도입 (요청 본문 검증)      |
+| HTTPS                 | 전체                  | SSL/TLS 인증서 적용 (전송 구간 암호화)         |
 
 ---
 

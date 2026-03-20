@@ -196,7 +196,7 @@ MySQL 연결 관리 및 쿼리 실행 유틸리티입니다.
 const type = req.query.type;
 const query = `SELECT * FROM service.menus WHERE \`${type}\` = 1`;
 // type에 임의 SQL을 주입할 수 있음
-// 예: type = "1\`=1 OR 1=1 --"
+// 예: type = "1\`=1 OR 1=1 --"  (1=1 조건으로 전체 데이터 노출)
 ```
 
 **수정 코드**
@@ -221,7 +221,7 @@ const query = `SELECT * FROM service.menus WHERE \`${column}\` = 1`;
 ```js
 const startPos = req.query.startPos || 0;
 // req.query.startPos는 문자열("5")이므로
-// "5" + 10 = "510" → 쿼리가 LIMIT 5, 510이 됨
+// "5" + 10 = "510" → 쿼리가 LIMIT 5, 510이 됨 (숫자 덧셈이 아닌 문자열 이어붙기)
 const query = `... LIMIT ${startPos}, ${startPos + 10}`;
 ```
 
@@ -240,10 +240,10 @@ if (isNaN(startPos) || startPos < 0) { return res.status(400)... }
 db.query(query, (err, results, fields) => {
     if (err) {
         console.log(err);
-        // return 없이 계속 실행
+        // return 없이 계속 실행 — 오류가 있어도 아래 코드로 진행됨
     }
     res.status(200);
-    res.json(results); // err 시 results = undefined → 오류
+    res.json(results); // err 발생 시 results = undefined → 500 오류 발생
 });
 ```
 
@@ -252,8 +252,8 @@ db.query(query, (err, results, fields) => {
 if (err) {
     console.log(err);
     res.status(500);
-    res.json({ result: -2, error: "Internal server error" });
-    return; // 즉시 종료
+    res.json({ result: -2, error: "Internal server error" }); // 서버 내부 오류
+    return; // 즉시 종료 — 이후 코드 실행하지 않음
 }
 ```
 
@@ -264,20 +264,20 @@ if (err) {
 #### `Utils.js` `module.exports` 누락 (수정됨)
 
 ```js
-// 수정 전: module.exports 없음
-// 수정 후:
+// 수정 전: module.exports 누락 — 외부에서 require()로 불러올 수 없음
+// 수정 후: module.exports 추가 — 외부 파일에서 사용 가능
 module.exports = Utils;
 ```
 
 #### 잘못된 HTTP 상태코드 — `routes/menus.js` (수정됨)
 
 ```js
-// 수정 전: 입력 오류에 405 반환
-res.status(405); // Method Not Allowed — 잘못된 사용
+// 수정 전: 입력 오류에 405 반환 (잘못된 사용)
+res.status(405); // 405 Method Not Allowed — HTTP 메서드가 허용되지 않을 때 사용하는 코드
 
 // 수정 후: 의미에 맞는 코드 사용
-res.status(400); // Bad Request — 잘못된 입력
-res.status(500); // Internal Server Error — 서버 오류
+res.status(400); // 400 Bad Request — 잘못된 입력 파라미터
+res.status(500); // 500 Internal Server Error — 서버 내부(DB) 오류
 ```
 
 ---
